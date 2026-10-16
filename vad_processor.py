@@ -9,6 +9,24 @@ torch.set_num_threads(1)
 log = logging.getLogger("LiveTranslate.VAD")
 
 
+def _load_silero_vad_bundled():
+    """Load the JIT model bundled with the silero-vad package.
+
+    silero_vad.load_silero_vad() ends in torch.jit.load(path), which hands the
+    raw path to C++ fopen(); on Windows that fails with errno 2 for non-ASCII
+    paths (e.g. a project folder containing Chinese characters) even though the
+    file exists. Opening the file in Python and passing the file object to
+    torch.jit.load sidesteps path handling entirely.
+    """
+    from pathlib import Path
+
+    import silero_vad
+
+    jit_path = Path(silero_vad.__file__).parent / "data" / "silero_vad.jit"
+    with open(jit_path, "rb") as f:
+        return torch.jit.load(f, map_location="cpu")
+
+
 class VADProcessor:
     """Voice Activity Detection with multiple modes."""
 
@@ -33,15 +51,13 @@ class VADProcessor:
         # (pinned branch -> offline when already cached) if the package is
         # missing, since torch.hub otherwise probes/downloads from GitHub.
         try:
-            from silero_vad import load_silero_vad
+            self._model = _load_silero_vad_bundled()
         except ImportError:
             self._model, _ = torch.hub.load(
                 repo_or_dir="snakers4/silero-vad:master",
                 model="silero_vad",
                 trust_repo=True,
             )
-        else:
-            self._model = load_silero_vad()
         self._model.eval()
 
         self._speech_buffer = []

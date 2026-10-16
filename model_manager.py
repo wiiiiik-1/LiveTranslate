@@ -65,6 +65,18 @@ def _proxy_env(proxy: str):
 APP_DIR = Path(__file__).parent
 MODELS_DIR = APP_DIR / "models"
 
+
+def abs_path_str(path) -> str:
+    """Absolute path string without resolving junctions or symlinks.
+
+    Path.resolve() follows NTFS junctions. When the project is reached through
+    an ASCII junction (workaround for C++ libraries like torch.jit and
+    sentencepiece failing on non-ASCII paths), resolving would hand the real
+    non-ASCII path back to those libraries. os.path.abspath is purely lexical.
+    """
+    return os.path.abspath(str(path))
+
+
 ASR_MODEL_IDS = {
     "sensevoice": "iic/SenseVoiceSmall",
     "funasr-nano": "FunAudioLLM/Fun-ASR-Nano-2512",
@@ -247,7 +259,7 @@ def is_faster_whisper_model_dir(path) -> bool:
 def resolve_custom_whisper_model(value) -> str | None:
     path = _custom_whisper_path(value)
     if path and is_faster_whisper_model_dir(path):
-        return str(path.resolve())
+        return abs_path_str(path)
     return None
 
 
@@ -291,7 +303,7 @@ def list_local_faster_whisper_models() -> list[dict]:
         if not is_faster_whisper_model_dir(model_dir):
             continue
         try:
-            resolved = str(model_dir.resolve())
+            resolved = abs_path_str(model_dir)
         except OSError:
             continue
         if resolved in seen:
@@ -319,7 +331,7 @@ def local_faster_whisper_display_name(path) -> str | None:
 
 def apply_cache_env():
     """Point all model caches to ./models/."""
-    resolved = str(MODELS_DIR.resolve())
+    resolved = abs_path_str(MODELS_DIR)
     os.environ["MODELSCOPE_CACHE"] = os.path.join(resolved, "modelscope")
     os.environ["HF_HOME"] = os.path.join(resolved, "huggingface")
     os.environ["TORCH_HOME"] = os.path.join(resolved, "torch")
@@ -625,7 +637,7 @@ def ensure_qwen_weights(model_dir, hub: str = "ms") -> None:
 
 
 def download_asr(engine, model_size="medium", hub="ms", proxy="system"):
-    resolved = str(MODELS_DIR.resolve())
+    resolved = abs_path_str(MODELS_DIR)
     ms_cache = os.path.join(resolved, "modelscope")
     hf_cache = os.path.join(resolved, "huggingface", "hub")
     with _proxy_env(proxy):

@@ -52,7 +52,7 @@ def _parse_device(device: str) -> tuple[str, int]:
 
 
 def _load_engine(config: dict):
-    from model_manager import MODELS_DIR, apply_cache_env
+    from model_manager import MODELS_DIR, abs_path_str, apply_cache_env
 
     apply_cache_env()
 
@@ -86,7 +86,7 @@ def _load_engine(config: dict):
             compute_type = "int8"
         download_root = config.get("download_root")
         if not download_root:
-            download_root = str((MODELS_DIR / "huggingface" / "hub").resolve())
+            download_root = abs_path_str(MODELS_DIR / "huggingface" / "hub")
         engine = ASREngine(
             model_size=config["model_size"],
             device=parsed_device,

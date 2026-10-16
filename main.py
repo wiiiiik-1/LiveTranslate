@@ -18,6 +18,7 @@ from datetime import datetime
 
 from model_manager import (
     DEFAULT_FUNASR_MODEL,
+    abs_path_str,
     apply_cache_env,
     funasr_display_name,
     funasr_supports_padding,
@@ -600,7 +601,7 @@ class LiveTranslateApp:
                 if engine_type == "whisper"
                 else None
             ),
-            "download_root": str((MODELS_DIR / "huggingface" / "hub").resolve()),
+            "download_root": abs_path_str(MODELS_DIR / "huggingface" / "hub"),
             "display_name": display_name,
             "remote_asr_url": remote_asr_url,
         }
