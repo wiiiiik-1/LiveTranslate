@@ -34,9 +34,11 @@ asr:
 
 translation:
   # OpenAI-compatible API settings
-  api_base: "http://127.0.0.1:1234/v1"
-  api_key: "(redacted)"
-  model: "hunyuan-mt-chimera-7b"
+  api_base: "https://api.deepseek.com/v1"
+  # Fill in your own key here, or configure it in the settings panel
+  # (user_settings.json overrides this file at runtime)
+  api_key: ""
+  model: "deepseek-chat"
   # Target language for translation
   target_language: "zh"
   # Source language hint (auto = detect from ASR)
