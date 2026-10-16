@@ -1800,10 +1800,10 @@ def main():
         info.exec()
 
         dlg = ModelEditDialog(None, {
-            "name": "hunyuan-mt-chimera-7b",
-            "api_base": "http://127.0.0.1:1234/v1",
-            "api_key": "(redacted)",
-            "model": "hunyuan-mt-chimera-7b",
+            "name": "DeepSeek",
+            "api_base": "https://api.deepseek.com/v1",
+            "api_key": "",
+            "model": "deepseek-chat",
         })
         dlg.setWindowTitle(t("setup_api_title"))
         if dlg.exec() == QDialog.DialogCode.Accepted:
@@ -1865,6 +1865,19 @@ def main():
     subwin_cfg = (saved or {}).get("subtitle_mode")
     subwin = SubtitleWindow(subwin_cfg)
     subwin_was_enabled = (subwin_cfg or {}).get("enabled", False)
+
+    # config.yaml may ship an empty api_key; build the initial Translator from
+    # the saved active model (user_settings.json) so it matches what the
+    # deferred settings apply installs a moment later.
+    _saved_models = (saved or {}).get("models") or []
+    _saved_active = (saved or {}).get("active_model", 0)
+    if 0 <= _saved_active < len(_saved_models):
+        _active = _saved_models[_saved_active]
+        for _field in ("api_base", "api_key", "model"):
+            if _active.get(_field):
+                config["translation"][_field] = _active[_field]
+        if "streaming" in _active:
+            config["translation"]["streaming"] = _active["streaming"]
 
     live_trans = LiveTranslateApp(config)
     live_trans.set_overlay(overlay)
