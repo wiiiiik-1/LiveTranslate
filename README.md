@@ -10,9 +10,6 @@ Works with any system audio — videos, livestreams, voice chat. No player modif
 ![Windows](https://img.shields.io/badge/Platform-Windows-0078d4)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## Screenshot
-
-![LiveTranslate](screenshot/en.png)
 
 ## Video
 
